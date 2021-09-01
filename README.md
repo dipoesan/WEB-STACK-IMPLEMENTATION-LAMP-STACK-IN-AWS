@@ -86,7 +86,7 @@ php -v
 ```
 ![image](https://user-images.githubusercontent.com/22638955/131744600-0c3b06b3-ec2e-463b-9773-e1c9cd55d1d8.png)
 
-We have now isntalled all components of our LAMP stack
+We have now installed all components of our LAMP stack
 
 To test our setup with a PHP script, it’s best to set up a proper `Apache Virtual Host` to hold our website’s files and folders. Virtual host allows us to have multiple websites located on a single machine and users of the websites will not notice.
 
@@ -134,12 +134,46 @@ sudo systemctl reload apache2
 ```
 Our new website is now active, but the web root `/var/www/projectlamp` is still empty.
 Create an `index.html` file in that location so that we can test that the virtual host works as expected:
+```
+sudo echo 'Hello LAMP from hostname' $(curl -s http://169.254.169.254/latest/meta-data/public-hostname) 'with public IP' $(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) > /var/www/projectlamp/index.html
+```
+Running the above command should copy the output of the curl command (the IP address for our EC2 instance) into the `index.html` file.
+![image](https://user-images.githubusercontent.com/22638955/131748033-4a281795-f99c-4007-b73b-a3991ee6faca.png)
 
+Now go to the browser and try to open the website URL using our IP address found in the index.html file:
+![image](https://user-images.githubusercontent.com/22638955/131748183-48356d78-0dc8-4b3e-9ff5-b61ee02122b3.png)
 
+### ENABLE PHP ON THE WEBSITE
+With the default **DirectoryIndex** settings on Apache, a file named `index.html` will always take precedence over an `index.php` file. This is useful for setting up maintenance pages in PHP applications, by creating a temporary `index.html` file containing an informative message to visitors. Because this page will take precedence over the `index.php` page, it will then become the landing page for the application. Once maintenance is over, the `index.html` is renamed or removed from the document root, bringing back the regular application page.
 
-
-
-
+In case you want to change this behavior, you’ll need to edit the `/etc/apache2/mods-enabled/dir.conf` file and change the order in which the index.php file is listed within the DirectoryIndex directive:
+```
+sudo vim /etc/apache2/mods-enabled/dir.conf
+```
+```
+<IfModule mod_dir.c>
+        #Change this:
+        #DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm
+        #To this:
+        DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+</IfModule>
+```
+After saving and closing the file, you will need to reload Apache so the changes take effect:
+```
+sudo systemctl reload apache2
+```
+Create a new file named index.php inside the custom web root folder:
+```
+vi /var/www/projectlamp/index.php
+```
+This will open a blank file. Add the following text, which is valid PHP code, inside the file:
+```
+<?php
+phpinfo();
+```
+Reloading the previous webpage we opened in our browser should give us the below:
+![image](https://user-images.githubusercontent.com/22638955/131749208-6a0f8905-7c34-4507-8169-44a8b940624a.png)
+If you can see this page in your browser, then your PHP installation is working as expected.
 
 
 Thanks to [darey.io](darey.io) for the opportunity to get into the DevOps sphere and also granting me access to projects like these.
