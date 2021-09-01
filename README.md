@@ -173,6 +173,7 @@ phpinfo();
 ```
 Reloading the previous webpage we opened in our browser should give us the below:
 ![image](https://user-images.githubusercontent.com/22638955/131749208-6a0f8905-7c34-4507-8169-44a8b940624a.png)
+
 If you can see this page in your browser, then your PHP installation is working as expected.
 
 
