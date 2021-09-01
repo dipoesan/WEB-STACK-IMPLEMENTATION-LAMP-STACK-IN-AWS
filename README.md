@@ -52,6 +52,91 @@ http://<Public-IP-Address>:80
 
 Seeing the above page means our web server is correctly installed and accessible through our firewall.
 
+### INSTALLING MYSQL (**M**)
+We need to install a database management system to store and manage our data in a relational database. Our choice is MySQL.
+```
+sudo apt install mysql-server -y
+```
+When the installation is finished, it is recommended that we run a security script that comes pre-installed with MySQL. This script will remove some insecure default settings and lock down access to our database system. Start the interactive script by running:
+```
+sudo mysql_secure_installation
+```
+This will ask if you want to configure the `VALIDATE PASSWORD PLUGIN`.
+Answer `Y` for yes, or anything else to continue without enabling.
+Regardless of whether you chose to set up the VALIDATE PASSWORD PLUGIN, your server will next ask you to select and confirm a password for the MySQL root user. 
+This is not to be confused with the system root. The database root user is an administrative user with full privileges over the database system. Even though the default authentication method for the MySQL root user dispenses the use of a password, even when one is set, you should define a strong password here as an additional safety measure.
+For the rest of the questions, press `Y` and hit the `ENTER` key at each prompt. This will remove some anonymous users and the test database, disable remote root logins, and load these new rules so that MySQL immediately respects the changes you have made.
+When you’re finished, test if you’re able to log in to the MySQL console by typing:
+```
+sudo mysql
+```
+![image](https://user-images.githubusercontent.com/22638955/131744050-10da9631-b923-4513-a2c0-c1bc79ee3251.png)
+
+### INSTALLING PHP (**P**)
+PHP is the component of our setup that will process code to display dynamic content to the end user. In addition to the `php` package, we’ll need `php-mysql`, a PHP module that allows PHP to communicate with MySQL-based databases. 
+We’ll also need `libapache2-mod-php` to enable Apache to handle PHP files. Core PHP packages will automatically be installed as dependencies.
+
+To install these 3 packages at once, we would run:
+```
+sudo apt install php libapache2-mod-php php-mysql
+```
+Once they're done installing, we can check the version of PHP we have installed:
+```
+php -v
+```
+![image](https://user-images.githubusercontent.com/22638955/131744600-0c3b06b3-ec2e-463b-9773-e1c9cd55d1d8.png)
+
+We have now isntalled all components of our LAMP stack
+
+To test our setup with a PHP script, it’s best to set up a proper `Apache Virtual Host` to hold our website’s files and folders. Virtual host allows us to have multiple websites located on a single machine and users of the websites will not notice.
+
+Apache on Ubuntu 20.04 has one server block enabled by default that is configured to serve documents from the /var/www/html directory.
+We will leave this configuration as is and will add our own directory next next to the default one.
+
+Create the directory for projectlamp:
+```
+sudo mkdir /var/www/projectlamp
+```
+Assign ownership of the directory with the current system user:
+```
+sudo chown -R $USER:$USER /var/www/projectlamp
+```
+Create and open a new configuration file in Apache’s sites-available directory using your preferred command-line editor.(My preferred CLI editor is `vi`)
+A blank file will be created. We would be pasting the below config into this blank file:
+```
+<VirtualHost *:80>
+    ServerName projectlamp
+    ServerAlias www.projectlamp 
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/projectlamp
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+With this VirtualHost configuration, we’re telling Apache to serve projectlamp using /var/www/projectlamp as its web root directory.
+
+We would now use `a2ensite` command to enable the new virtual host:
+```
+sudo a2ensite projectlamp
+```
+We might want to disable the default website that comes installed with Apache. This is required if we’re not using a custom domain name, because in this case Apache’s default configuration would overwrite our virtual host.
+```
+sudo a2dissite 000-default
+```
+To make sure our configuration file doesn’t contain syntax errors, run:
+```
+sudo apache2ctl configtest
+```
+Reload Apache so these changes take effect:
+```
+sudo systemctl reload apache2
+```
+Our new website is now active, but the web root `/var/www/projectlamp` is still empty.
+Create an `index.html` file in that location so that we can test that the virtual host works as expected:
+
+
+
 
 
 
